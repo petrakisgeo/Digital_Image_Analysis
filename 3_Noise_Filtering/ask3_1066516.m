@@ -2,34 +2,36 @@ clc;
 clear;
 close all;
 
-load("tiger.mat");
-
-img=double(tiger);
-
-noisy_img_gaussian=imnoise(img,'gaussian',0,0.0064);
+img=imread("flower.png");
+img=im2double(im2gray(img));
+noisy_img_gaussian=imnoise(img,'gaussian',0,0.008);
 
 %task 1: ipologismos SNR gia na vroume to mean value manually
-sn=snr(img,noisy_img_gaussian-img);
+sn=snr(img,noisy_img_gaussian-img) 
 
-%ipologizoume oti gia na exoume mean SNR iso me 15dB (15.04), efarmozoume gaussian
-%thorivo me tipiki apoklisi σ=0.0064
+%ipologizoume oti gia na exoume mean SNR iso me 15dB, efarmozoume gaussian
+%thorivo me tipiki apoklisi σ=0.008
 
 %sxediazoume moving average filter
-avg=fspecial('average',2);
+dim=3;
+avg=fspecial('average',dim); %arxika 3x3
 
 %apply to image
-filtered_avg=imfilter(noisy_img_gaussian,avg,'conv');
-filtered_median=medfilt2(noisy_img_gaussian);
+filtered_avg=imfilter(noisy_img_gaussian,avg);
+filtered_median=medfilt2(noisy_img_gaussian, [dim dim]); %apply median filter
+
+%gia elegxo twn snr meta ta filtra
 [peak,snratiofiltered_avg]=psnr(filtered_avg,img);
 [peak,snratiofiltered_median]=psnr(filtered_median,img);
-%parathrw oti meta thn efarmogh tou filtrou o logos SNR den veltiwnetai
-%parolo pou o thorivos ipsilis sixnotitas ehei apovlithei
-%parathrw oti h auksisi twn diastasewn tou moving average filter
-%xeirotereuei tin poiothta ths eikonas
-%parathrhsh: to moving average filter ine pio katallhlo apo to moving
-%median giati to moving median prokalei tholwsi kai einai pio katallhlo gia
-%kroustiko thorivo
-figure('Position',[200 100 800 600]);
+%parathrw oti h auksisi twn diastasewn twn filtrwn
+%xeirotereuei tin poiothta ths eikonas mexri opou to 11x11 filtra prokaloun
+%meiwsi tou snr sxetika me tin thorivwdis eikona
+%apo optiki parathrhsh to filtro moving average fainetai na diathrei
+%perissoteres plhrofories kai na tholwnei ligotero tin eikona parolo pou h
+%filtrarismeni eikona me to median filtro ehei megalitero SNR
+
+figure(1);
+set(gcf,'Position',[100 500 800 450]);
 subplot(221);
 imshow(img);
 title("original image");
@@ -44,48 +46,25 @@ imshow(filtered_median);
 title("median filtered image");
 
 %task2: kroustikos thorivos
-noisy_img_imp=imnoise(img,'salt & pepper', 0.2);
+noisy_img_imp=imnoise(img,'salt & pepper', 0.25);
 filtered_avg=imfilter(noisy_img_imp,avg,'conv');
 filtered_median=medfilt2(noisy_img_imp);
 
-figure('Position',[200 100 800 600]);
+figure(2);
+set(gcf,'Position',[900 500 800 450]);
 subplot(221);
 imshow(img);
 title("original image");
 subplot(222);
 imshow(noisy_img_imp,[]);
-title("salt and pepper noise 20%");
+title("salt and pepper noise 25%");
 subplot(223);
 imshow(filtered_avg,[]);
 title("moving average filter");
 subplot(224);
 imshow(filtered_median,[]);
 title("moving median filter");
-%parathrw oti to moving average filter ine teleiws akatallhlo gia na
-%afairesei ton kroustiko thorivo se antithesi me to moving median filter
 
-%task3: sindiasmos thorivwn
-noisy_img=imnoise(img,'gaussian',0,0.064);
-noisy_img=imnoise(noisy_img,'salt & pepper',0.2);
-
-avg_median_filtered=imfilter(medfilt2(noisy_img),avg,'conv'); %prwta median meta average
-median_avg_filtered=medfilt2(imfilter(noisy_img,avg,'conv'));
-
-figure("Position",[200,100,800,600]);
-subplot(221);
-imshow(img);
-title("original image");
-subplot(222);
-imshow(noisy_img,[]);
-title("gaussian+salt n pepper");
-subplot(223);
-imshow(avg_median_filtered,[]);
-title("average first median second");
-subplot(224);
-imshow(filtered_median,[]);
-title("median first average second");
-
-%opws itan anamenomeno apo tin efarmogi tou average filter se
-%eikona me kroustiko thorivo (to apotelesma einai ousiastika apwleia
-%plhroforias), to apotelesma efarmogis prwta tou average filter einai
-%arketa xeirotero
+for i=1:2
+    saveas(figure(i),"fig"+num2str(i)+".png");
+end

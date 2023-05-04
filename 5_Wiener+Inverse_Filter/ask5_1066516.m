@@ -2,7 +2,6 @@ clc;
 clear;
 close all;
 
-import psf.*;
 
 img=imread("lenna.jpg");
 img=double(mat2gray(rgb2gray(img))); %image scaling sto diasthma [0 1]
